@@ -1,0 +1,17 @@
+.panel {
+  width: 200px;
+  height: 200px;
+  border: 1px solid;
+}
+
+.drop-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.drop-container .drag-item {
+  width: 200px;
+  height: 200px;
+  border: 1px solid;
+}
