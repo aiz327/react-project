@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { MouseEventHandler, useCallback, useEffect, useMemo, useState } from "react";
 import './dashboard.css'
 
 type DragItem = {
@@ -9,7 +9,10 @@ type DragItem = {
 type DragItemProp = {
   data: DragItem,
   index: number,
-  swapBoard: (delIndex: number, swapIndex: number) => void
+  swapBoard: (delIndex: number, swapIndex: number) => void,
+  // onClick: (event: React.MouseEvent, dragItem: DragItem) => void
+  onClick(event: React.MouseEvent, dragItem?: DragItem): void,
+  [key: string]: any
 };
 
 function useIsAdmin() {
@@ -24,7 +27,7 @@ function useIsAdmin() {
 
 function DragItem(props: DragItemProp) {
   const [panel, setPanel] = useState(1)
-  const { data, index: swapIndex, swapBoard } = props;
+  const { data, index: swapIndex, swapBoard, onClick, testFn } = props;
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
@@ -48,10 +51,16 @@ function DragItem(props: DragItemProp) {
     const delIndex = event.dataTransfer.getData("index")
     swapBoard(parseInt(delIndex), swapIndex)
   }
+
+  const handlClick = (event: React.MouseEvent) => {
+    onClick(event, data);
+    console.log('testfn', testFn())
+  }
   
   return (
     <div className="drag-item" 
       draggable 
+      onClick={handlClick}
       onDragStart={handleDragStart}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
@@ -76,6 +85,7 @@ function DashBoardView() {
       name: "面板3"
     }
   ])
+  const [currentBoard, setCurrentBoard] = useState<DragItem>();
 
   const swapBoard = (delIndex: number, swapIndex: number) => {
     const swapObj = board[swapIndex]
@@ -90,11 +100,23 @@ function DashBoardView() {
     setBoard([...board])
   }
 
+  const memoValue = useMemo(() => currentBoard?.id, [currentBoard]);
+
+  const boardClick = (event: React.MouseEvent, dragItem: DragItem) : void => {
+    setCurrentBoard(dragItem)
+  }
+
+  const memoCallBack = useCallback(() => currentBoard?.id, [currentBoard])
+
   return (
     <div className="drop-container">
       {
-        board.map((props, index) => <DragItem swapBoard={swapBoard} data={props} index={index}></DragItem>)
+        board.map((props, index) => <DragItem testFn={memoCallBack} onClick={boardClick} swapBoard={swapBoard} data={props} index={index}></DragItem>)
       }
+      <div>
+        <div>memo和callback</div>
+        <div>{memoValue}</div>
+      </div>
     </div>
   )
 }
